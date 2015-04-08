@@ -1,0 +1,98 @@
+###   Explore Data Characteristics ###
+
+str(GS)
+
+###   Need to drop row 1 as these are row names only ##
+
+GS<-GS[ ,-(30)]
+
+str(GS)
+
+GS<-GS[ ,-1]
+
+str(GS)
+
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+#GS1$X1.6<-as.numeric(GS1$X1.6)
+#GS1$X2.5<-as.numeric(GS1$X2.5)
+
+
+####    If I omit NA values, I am left with nothing to analyse  ####
+
+
+#GS_omit<-na.omit(GS)
+
+####    Will need to average a value for NA's for each record   ####
+
+#GS1$mean<-mean(GS1, na.rm=TRUE)
+
+#ind <- which(is.na(GS), arr.ind=TRUE)
+#GS[ind] <- rowMeans(df,  na.rm = TRUE)[ind[,1]]
+
+## Error - 'x' must be an array of at least two dimensions .......... Can I sort this by introducing Row names? ##
+
+#GS[which(is.na(GS), arr.ind=TRUE)] <- rowMeans(GS[!complete.cases(df), ], na.rm=TRUE)
+
+## Error - invalide 'type' (closure) of arguement
+
+
+####################################################################################
+#### To determine number of clusters, attempt 'within sum of squares' method ####
+
+wss <- (nrow(GS))*sum(apply(GS,2,var))
+for (i in 2:20) wss[i] <- sum(kmeans(GS, 
+                                     centers=i)$withinss)
+
+plot(wss, xlab="Number of Clusters",
+     ylab="Within groups sum of squares")
+
+#### Unsuccessful.  NA's introduced by coercian.  Too many unanswered questions? ####
+#####################################################################################
+
+##  Try NBClust method instead  ##
+
+
+install.packages("NBClust")
+library(NbClust)
+
+
+NGS <- NbClust(GS, min.nc=2, max.nc=20, method="kmeans")
+table(NGS$Best.n[1,])
+
+barplot(table(NGS$Best.n[1,]), 
+        xlab="Numer of Clusters", ylab="Number of Criteria",
+        main="Number of Clusters Chosen by 20 criteria")
+
+######################################################################################
+
+##          Apply Clustering algorithm.           #######
+## Start with kmeans, can change later if need be #######
+
+fit <- kmeans(GS1, 5) # 5 cluster solution
+# get cluster means 
+aggregate(GS1,by=list(fit$cluster),FUN=mean)
+# append cluster assignment
+GS_fit <- data.frame(GS1, fit$cluster)
+
+
